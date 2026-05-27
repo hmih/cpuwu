@@ -1,0 +1,5 @@
+[*]
+[tb_hello]
+clk
+led
+counter[24:0]

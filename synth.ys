@@ -1,0 +1,9 @@
+# yosys synthesis script
+read_verilog src/hello.v
+synth_ecp5 -json hello.json -top hello
+
+# Cell Assignment Statistics
+tee -o hello.cas stat
+
+# Intermediate Synthesis Schematic (requires graphviz to render)
+write_json hello.iss.json

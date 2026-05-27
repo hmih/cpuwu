@@ -1,0 +1,5 @@
+# ECP5 pin constraints for hello.v on ULX3S board
+# Pin G2 is LED0 on ULX3S (active-low via transistor)
+LOCATE COMP "led" SITE "G2";
+IOBUF PORT "led" IO_TYPE=LVCMOS33 DRIVE=4;
+FREQUENCY PORT "clk" 25.0 MHz;
