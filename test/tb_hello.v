@@ -14,7 +14,7 @@ module tb_hello;
     always #10 clk = ~clk;
 
     initial begin
-        $dumpfile("hello_tb.vcd");
+        $dumpfile("gen/hello_tb.vcd");
         $dumpvars(0, tb_hello);
         clk = 0;
 

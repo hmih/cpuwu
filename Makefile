@@ -23,16 +23,29 @@
 
 TOP      := hello
 SRC      := src/$(TOP).v
-TB       := src/tb_$(TOP).v
+TB       := test/tb_$(TOP).v
+OUT      := gen
 
 BOARD    ?= ulx3s
 DEVICE   ?= 25k
 PACKAGE  ?= CABGA381
 SPEED    ?= 6
 
+# Derived output paths
+JSON     := $(OUT)/$(TOP).json
+CAS      := $(OUT)/$(TOP).cas
+ISS_JSON := $(OUT)/$(TOP).iss.json
+CONFIG   := $(OUT)/$(TOP).config
+BIT      := $(OUT)/$(TOP).bit
+VVP      := $(OUT)/$(TOP)_tb.vvp
+VCD      := $(OUT)/$(TOP)_tb.vcd
+SCHEM    := $(OUT)/$(TOP)_schem
+
+_dir     := $(shell mkdir -p $(OUT))
+
 # ── Default ──────────────────────────────────────────────────────────────────
 .PHONY: all
-all: $(TOP).bit
+all: $(BIT)
 
 # ── Lint ─────────────────────────────────────────────────────────────────────
 .PHONY: lint
@@ -44,28 +57,30 @@ lint:
 
 # ── Simulation ───────────────────────────────────────────────────────────────
 .PHONY: sim
-sim: $(TOP)_tb.vvp
+sim: $(VVP)
 	@echo "==> Running iverilog"
 	vvp $<
 	@echo "==> Opening gtkwave"
-	gtkwave $(TOP)_tb.vcd $(TOP).gtkw &
+	gtkwave $(VCD) wave.gtkw &
 
-$(TOP)_tb.vvp: $(TB) $(SRC)
+$(VVP): $(TB) $(SRC)
+	@mkdir -p $(OUT)
 	iverilog -g2012 -Wall -o $@ $(SRC) $(TB)
 
 # ── Synthesis ────────────────────────────────────────────────────────────────
 .PHONY: synth
-synth: $(TOP).json $(TOP).cas
+synth: $(JSON) $(CAS)
 
-$(TOP).json $(TOP).cas $(TOP).iss.json: synth.ys $(SRC)
+$(JSON) $(CAS) $(ISS_JSON): synth.ys $(SRC)
+	@mkdir -p $(OUT)
 	@echo "==> Yosys synthesis"
 	yosys -q synth.ys
 
 # ── Place & Route ────────────────────────────────────────────────────────────
 .PHONY: pnr
-pnr: $(TOP).config
+pnr: $(CONFIG)
 
-$(TOP).config: $(TOP).json $(TOP).lpf
+$(CONFIG): $(JSON) pins.lpf
 	@echo "==> nextpnr place & route ($(DEVICE)-$(PACKAGE))"
 	nextpnr-ecp5 \
 		--json $< \
@@ -78,25 +93,25 @@ $(TOP).config: $(TOP).json $(TOP).lpf
 
 # ── Bitstream ────────────────────────────────────────────────────────────────
 .PHONY: bitstream
-bitstream: $(TOP).bit
+bitstream: $(BIT)
 
-$(TOP).bit: $(TOP).config
+$(BIT): $(CONFIG)
 	@echo "==> ecppack"
 	ecppack --input $< --bit $@
 
 # ── Flash ────────────────────────────────────────────────────────────────────
 .PHONY: flash
-flash: $(TOP).bit
+flash: $(BIT)
 	@echo "==> Flashing to $(BOARD)"
 	openFPGALoader --board=$(BOARD) $<
 
 # ── Inspect ──────────────────────────────────────────────────────────────────
 .PHONY: view
-view: $(TOP).json
-	yosys -p "read_json $(TOP).json; show -format png -prefix $(TOP)_schem"
+view: $(JSON)
+	yosys -p "read_json $(JSON); show -format png -prefix $(SCHEM)"
 
 .PHONY: stats
-stats: $(TOP).cas
+stats: $(CAS)
 	@cat $<
 
 .PHONY: check
@@ -107,10 +122,7 @@ check:
 # ── Cleanup ──────────────────────────────────────────────────────────────────
 .PHONY: clean
 clean:
-	rm -f $(TOP).json $(TOP).cas $(TOP).iss.json
-	rm -f $(TOP).config $(TOP).bit
-	rm -f $(TOP)_tb.vvp $(TOP)_tb.vcd
-	rm -f $(TOP)_schem.png $(TOP)_schem.dot
+	rm -rf $(OUT)
 
 .PHONY: mrproper
 mrproper: clean
