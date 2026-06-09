@@ -1,2 +1,5 @@
 gen/
 result
+vendor/
+.DS_Store
+.direnv/

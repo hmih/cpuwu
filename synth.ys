@@ -1,9 +1,4 @@
-# yosys synthesis script
+# yosys synthesis script for GateMate FPGA
 read_verilog src/hello.v
-synth_ecp5 -json gen/hello.json -top hello
-
-# Cell Assignment Statistics
-tee -o gen/hello.cas stat
-
-# Intermediate Synthesis Schematic (requires graphviz to render)
-write_json gen/hello.iss.json
+synth_gatemate -top hello -luttree -nomx8
+write_json gen/hello.json

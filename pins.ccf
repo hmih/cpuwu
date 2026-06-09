@@ -1,0 +1,16 @@
+# Olimex GateMateA1-EVB Rev.C — pin constraints (CCF format)
+# Clock: 10 MHz oscillator at IO_SB_A8
+# Onboard LED D1: IO_SB_B6
+#
+# Syntax: NET "<signal>" Loc = "<pad>" | <constraints>;
+#
+# Available on headers:
+#   BANK_EB1 (J2):   IO_EB_A0..A8, IO_EB_B0..B8  (2x18 header)
+#   GPIO0 (J10):     mixed pins
+# See schematics in docs/ for full pinout.
+
+# 10 MHz clock from onboard oscillator
+NET "clk" Loc = "IO_SB_A8" | SCHMITT_TRIGGER=true;
+
+# Onboard LED D1
+NET "led" Loc = "IO_SB_B6" | DRIVE=6;

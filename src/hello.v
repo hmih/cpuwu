@@ -1,15 +1,20 @@
-// hello.v -- simple counter driving an LED
-// Toggles output every ~1 second with a 25 MHz clock
+// hello.v — 1-second LED toggle with 10 MHz clock
+// Parameter COUNT_MAX lets the testbench override for fast simulation.
 
-module hello (
-    input  wire clk,    // 25 MHz system clock
-    output reg  led     // LED output
+module hello #(
+    parameter COUNT_MAX = 25'd9_999_999   // 1 second at 10 MHz
+) (
+    input  wire clk,     // 25 MHz system clock
+    output reg  led      // LED output
 );
-    // 25-bit counter: 2^25 / 25e6 ≈ 1.34 seconds
-    reg [24:0] counter;
+    reg [24:0] counter;  // 25-bit counter (0 .. 33,554,431)
 
     always @(posedge clk) begin
-        counter <= counter + 1;
-        led     <= counter[24];
+        if (counter == COUNT_MAX) begin
+            counter <= 25'd0;
+            led     <= ~led;
+        end else begin
+            counter <= counter + 25'd1;
+        end
     end
 endmodule
