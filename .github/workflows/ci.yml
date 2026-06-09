@@ -31,13 +31,8 @@ jobs:
         with:
           nix_path: nixpkgs=channel:nixos-unstable
 
-      - name: Install OSS CAD Suite (GateMate toolchain)
-        run: |
-          mkdir -p vendor
-          curl -L -o oss-cad-suite.tgz \
-            'https://github.com/YosysHQ/oss-cad-suite-build/releases/download/2026-05-30/oss-cad-suite-linux-x64-20260530.tgz'
-          tar xf oss-cad-suite.tgz -C vendor/
-          rm oss-cad-suite.tgz
+      - name: Install OSS CAD Suite
+        run: ./vendor.sh
 
       - name: Build bitstream
         run: >
@@ -55,13 +50,8 @@ jobs:
         with:
           nix_path: nixpkgs=channel:nixos-unstable
 
-      - name: Install OSS CAD Suite (GateMate toolchain)
-        run: |
-          mkdir -p vendor
-          curl -L -o oss-cad-suite.tgz \
-            'https://github.com/YosysHQ/oss-cad-suite-build/releases/download/2026-05-30/oss-cad-suite-linux-x64-20260530.tgz'
-          tar xf oss-cad-suite.tgz -C vendor/
-          rm oss-cad-suite.tgz
+      - name: Install OSS CAD Suite
+        run: ./vendor.sh
 
       - name: Verilator + Yosys lint
         run: >
